@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Python
+*/__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
+
+# Caché de Hugging Face (generada por ml/retrain_model.py)
+.hf_cache/
+
+# Artefactos generados (se regeneran con ml/train_eval.ipynb)
+ml/imdb_sentiment_baseline_errors.cs
