@@ -15,3 +15,5 @@ dist/
 
 # Artefactos generados (se regeneran con ml/train_eval.ipynb)
 ml/imdb_sentiment_baseline_errors.cs
+
+*.env

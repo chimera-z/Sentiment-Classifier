@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+import redis
+from dotenv import load_dotenv
 
 import joblib
 from fastapi import FastAPI, HTTPException
@@ -19,6 +21,15 @@ if not MODEL_PATH.exists():
     )
 
 model = joblib.load(MODEL_PATH)
+
+load_dotenv()
+r = redis.Redis(
+    host=os.getenv("REDIS_HOST"),
+    port=int(os.getenv("REDIS_PORT")),
+    username=os.getenv("REDIS_USERNAME"),
+    password=os.getenv("REDIS_PASSWORD"),
+    decode_responses=True,
+)
 
 ID_TO_LABEL = {0: "negative", 1: "positive"}
 
@@ -63,7 +74,6 @@ async def health():
 
 @app.post("/predict/", response_model=PredictionResponse)
 async def predict(movie_review: MovieReview):
-    """Predict the sentiment of a single movie review."""
     raw = movie_review.review
     cleaned = clean_text(raw)
 
@@ -73,7 +83,17 @@ async def predict(movie_review: MovieReview):
             detail="Review contains no usable text after cleaning.",
         )
 
-    probability_positive = float(model.predict_proba([cleaned])[0, 1])
+    cache_key = f"sentiment:{cleaned}"
+
+    result = r.get(cache_key)
+    if result is not None:
+        print("Cache HIT")
+        probability_positive = float(result)
+    else:
+        print("Cache MISS")
+        probability_positive = float(model.predict_proba([cleaned])[0, 1])
+        r.set(cache_key, probability_positive)
+    
     label_id = int(probability_positive >= 0.5)
 
     return PredictionResponse(

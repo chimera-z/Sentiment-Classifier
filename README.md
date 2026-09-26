@@ -13,6 +13,7 @@ FastAPI para predecir nuevas reseñas.
   `CountVectorizer(1–2 gramas) + LogisticRegression` con aproximadamente 89.5% de accuracy en el conjunto de test.
 - API (`app/`): endpoint `POST /predict/` que recibe una reseña y devuelve
   la etiqueta y la probabilidad de que sea positiva.
+- Caché (Redis Cloud): almacena las probabilidades de predicciones previamente calculadas para evitar inferencias repetidas.
 
 ## Estructura
 
@@ -21,13 +22,13 @@ FastAPI para predecir nuevas reseñas.
 ├── app/
 │   ├── main.py            # API FastAPI
 │   ├── preprocess.py      # limpieza de texto (inferencia)
-│   ├── requirements.txt
 │   └── pyproject.toml
 └── ml/
-    ├── train_eval.ipynb   # análisis y experimentos
-    ├── preprocessor.py    # limpieza de texto (entrenamiento)
-    ├── retrain_model.py   # reentrena el modelo
-    └── sentiment_model.pkl
+│   ├── train_eval.ipynb   # análisis y experimentos
+│   ├── preprocessor.py    # limpieza de texto (entrenamiento)
+│   ├── retrain_model.py   # reentrena el modelo
+│   └── sentiment_model.pkl
+└── requirements.txt
 ```
 
 ## Requisitos
@@ -39,6 +40,17 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+## Configuración
+
+La API utiliza variables de entorno para conectarse a Redis Cloud.
+
+Crear un archivo .env en `/app` con:
+
+REDIS_HOST=...
+REDIS_PORT=...
+REDIS_USERNAME=...
+REDIS_PASSWORD=...
 
 ## Ejecutar la API
 
